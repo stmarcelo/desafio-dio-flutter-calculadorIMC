@@ -1,7 +1,8 @@
-import 'package:calculadora_imc/model/registro.dart';
+import 'package:calculadora_imc/model/registro_model.dart';
 import 'package:calculadora_imc/service/registro_service.dart';
 import 'package:calculadora_imc/views/history_view.dart';
 import 'package:calculadora_imc/views/home_view.dart';
+import 'package:calculadora_imc/views/shared/menu.dart';
 import 'package:flutter/material.dart';
 
 class MainView extends StatefulWidget {
@@ -25,6 +26,7 @@ class _MainViewState extends State<MainView> {
         child: DefaultTabController(
       length: 2,
       child: Scaffold(
+        drawer: MenuWidget(context),
         appBar: AppBar(
           title: const Text("Calculadora de IMC"),
           bottom: const TabBar(tabs: [
@@ -50,9 +52,9 @@ class _MainViewState extends State<MainView> {
   }
 
   void _callNew(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
-    var _pesoController = TextEditingController();
-    var _alturaController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    var pesoController = TextEditingController();
+    var alturaController = TextEditingController();
     showDialog(
         context: context,
         builder: (BuildContext bc) {
@@ -64,11 +66,11 @@ class _MainViewState extends State<MainView> {
                   padding: const EdgeInsets.all(10),
                   child: Wrap(children: [
                     Form(
-                        key: _formKey,
+                        key: formKey,
                         child: Column(children: [
                           TextFormField(
                             autofocus: true,
-                            controller: _pesoController,
+                            controller: pesoController,
                             decoration: const InputDecoration(
                                 label: Text("Peso (kg)"),
                                 icon: Icon(Icons.monitor_weight)),
@@ -80,7 +82,7 @@ class _MainViewState extends State<MainView> {
                           ),
                           TextFormField(
                             autofocus: true,
-                            controller: _alturaController,
+                            controller: alturaController,
                             decoration: const InputDecoration(
                                 label: Text("Altura (m)"),
                                 icon: Icon(Icons.height)),
@@ -103,14 +105,14 @@ class _MainViewState extends State<MainView> {
               ),
               ElevatedButton.icon(
                   onPressed: () async {
-                    _pesoController.text =
-                        _pesoController.text.replaceAll(",", ".");
-                    _alturaController.text =
-                        _alturaController.text.replaceAll(",", ".");
-                    if (_formKey.currentState!.validate()) {
-                      var peso = double.tryParse(_pesoController.text) ?? 0;
-                      var altura = double.tryParse(_alturaController.text) ?? 0;
-                      var reg = Registro(peso, altura);
+                    pesoController.text =
+                        pesoController.text.replaceAll(",", ".");
+                    alturaController.text =
+                        alturaController.text.replaceAll(",", ".");
+                    if (formKey.currentState!.validate()) {
+                      var peso = double.tryParse(pesoController.text) ?? 0;
+                      var altura = double.tryParse(alturaController.text) ?? 0;
+                      var reg = RegistroModel(peso, altura);
                       await RegistroService.instance.add(reg);
                       _showResult(reg);
                     }
@@ -130,7 +132,7 @@ class _MainViewState extends State<MainView> {
     return null;
   }
 
-  void _showResult(Registro reg) {
+  void _showResult(RegistroModel reg) {
     _key.currentState?.setState(() {});
     Navigator.pop(context);
     setState(() {});
@@ -142,7 +144,7 @@ class _MainViewState extends State<MainView> {
         });
   }
 
-  Widget _result(Registro registro) {
+  Widget _result(RegistroModel registro) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Wrap(
@@ -191,7 +193,7 @@ class _MainViewState extends State<MainView> {
           Card(
             elevation: 10,
             child: Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Row(
                 children: <Widget>[
                   const Icon(Icons.monitor_weight),

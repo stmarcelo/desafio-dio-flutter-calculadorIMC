@@ -1,18 +1,18 @@
-import 'package:calculadora_imc/model/registro.dart';
+import 'package:calculadora_imc/model/registro_model.dart';
 
 class RegistroService {
   static final RegistroService instance = RegistroService._();
-  List<Registro>? _registros;
+  List<RegistroModel>? _registros;
 
   RegistroService._() {
     _registros = [];
   }
 
-  Future add(Registro registro) async {
+  Future add(RegistroModel registro) async {
     _registros!.add(registro);
   }
 
-  Future<List<Registro>> getAll() async {
+  Future<List<RegistroModel>> getAll() async {
     return _registros!;
   }
 }

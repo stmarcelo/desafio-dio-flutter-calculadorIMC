@@ -1,4 +1,4 @@
-import 'package:calculadora_imc/model/registro.dart';
+import 'package:calculadora_imc/model/registro_model.dart';
 import 'package:calculadora_imc/service/registro_service.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +10,7 @@ class HistoryView extends StatefulWidget {
 }
 
 class HistoryViewState extends State<HistoryView> {
-  List<Registro>? _registros;
+  List<RegistroModel>? _registros;
 
   @override
   void initState() {
@@ -44,7 +44,7 @@ class HistoryViewState extends State<HistoryView> {
         });
   }
 
-  Widget _listCard(Registro reg) {
+  Widget _listCard(RegistroModel reg) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Wrap(

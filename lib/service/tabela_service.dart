@@ -1,33 +1,33 @@
-import 'package:calculadora_imc/model/tabela.dart';
+import 'package:calculadora_imc/model/tabela_model.dart';
 
 class TabelaService {
   static final TabelaService instance = TabelaService._();
-  var _tabelas = <Tabela>[];
+  var _tabelas = <TabelaModel>[];
 
   TabelaService._() {
-    _tabelas = <Tabela>[
-      Tabela(0, 16, "Magreza grave"),
-      Tabela(16, 17, "Magreza moderada"),
-      Tabela(17, 18.5, "Magreza leve"),
-      Tabela(18.5, 25, "Saudável"),
-      Tabela(25, 30, "Sobrepeso"),
-      Tabela(30, 35, "Obesidade grau I"),
-      Tabela(35, 40, "Obesidade grau II (severa)"),
-      Tabela(40, 999, "Obesidade grau III (mórbida)"),
+    _tabelas = <TabelaModel>[
+      TabelaModel(0, 16, "Magreza grave"),
+      TabelaModel(16, 17, "Magreza moderada"),
+      TabelaModel(17, 18.5, "Magreza leve"),
+      TabelaModel(18.5, 25, "Saudável"),
+      TabelaModel(25, 30, "Sobrepeso"),
+      TabelaModel(30, 35, "Obesidade grau I"),
+      TabelaModel(35, 40, "Obesidade grau II (severa)"),
+      TabelaModel(40, 999, "Obesidade grau III (mórbida)"),
     ];
   }
 
-  List<Tabela> getAll() {
+  List<TabelaModel> getAll() {
     return _tabelas;
   }
 
-  Tabela get(double indice) {
+  TabelaModel get(double indice) {
     return _tabelas
         .where((t) => t.indiceInicial <= indice && t.indiceFinal > indice)
         .first;
   }
 
-  Tabela getById(int id) {
+  TabelaModel getById(int id) {
     return _tabelas.where((t) => t.id == id).first;
   }
 }
