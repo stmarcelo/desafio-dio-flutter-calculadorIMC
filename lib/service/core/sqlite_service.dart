@@ -44,7 +44,7 @@ class SQLiteService {
 
   static Future<Database> _init() async {
     var dbPath = path.join(await getDatabasesPath(), 'calcims.db');
-    await deleteDatabase(dbPath);
+    //await deleteDatabase(dbPath);
     return await openDatabase(dbPath, version: _scripts.length,
         onCreate: (db, version) async {
       var scripts = _scripts[version]!.split(';');
