@@ -1,5 +1,5 @@
-import 'package:calculadora_imc/model/registro_model.dart';
-import 'package:calculadora_imc/service/registro_service.dart';
+import 'package:calculadora_imc/model/resultado_model.dart';
+import 'package:calculadora_imc/repository/resultado_repository.dart';
 import 'package:flutter/material.dart';
 
 class HistoryView extends StatefulWidget {
@@ -10,27 +10,35 @@ class HistoryView extends StatefulWidget {
 }
 
 class HistoryViewState extends State<HistoryView> {
-  List<RegistroModel>? _registros;
+  late List<ResultadoModel> _registros;
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-
-    _loadDados();
+    _loadServices();
   }
 
-  void _loadDados() async {
-    _registros = await RegistroService.instance.getAll();
-    setState(() {});
+  void refresh() {
+    _loading = true;
+    _loadServices();
+  }
+
+  Future _loadServices() async {
+    var repository = await ResultadoRepository.getInstance();
+    _registros = await repository.getAll();
+    setState(() {
+      _loading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_registros == null) {
+    if (_loading) {
       return const Center(
         child: CircularProgressIndicator(),
       );
-    } else if (_registros!.isEmpty) {
+    } else if (_registros.isEmpty) {
       return const Center(
           child: Padding(
         padding: EdgeInsets.all(15),
@@ -38,13 +46,13 @@ class HistoryViewState extends State<HistoryView> {
       ));
     }
     return ListView.builder(
-        itemCount: _registros!.length,
+        itemCount: _registros.length,
         itemBuilder: (BuildContext bc, int i) {
-          return _listCard(_registros![i]);
+          return _listCard(_registros[i]);
         });
   }
 
-  Widget _listCard(RegistroModel reg) {
+  Widget _listCard(ResultadoModel reg) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Wrap(
@@ -62,7 +70,7 @@ class HistoryViewState extends State<HistoryView> {
                       const Icon(Icons.info),
                       const SizedBox(width: 10),
                       Text(
-                        reg.tabela?.descricao,
+                        reg.tabela?.descricao ?? "",
                         style: const TextStyle(fontSize: 24),
                       ),
                     ],

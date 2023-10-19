@@ -1,5 +1,6 @@
-import 'package:calculadora_imc/model/registro_model.dart';
-import 'package:calculadora_imc/service/registro_service.dart';
+import 'package:calculadora_imc/model/resultado_model.dart';
+import 'package:calculadora_imc/repository/resultado_repository.dart';
+import 'package:calculadora_imc/repository/settings_repository.dart';
 import 'package:calculadora_imc/views/history_view.dart';
 import 'package:calculadora_imc/views/home_view.dart';
 import 'package:calculadora_imc/views/shared/menu.dart';
@@ -13,11 +14,19 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  final GlobalKey<HistoryViewState> _key = GlobalKey();
+  final GlobalKey<HistoryViewState> _keyHistory = GlobalKey();
+  late ResultadoRepository repository;
+  late SettingsRepository settingsRepository;
 
   @override
   void initState() {
     super.initState();
+    _loadServices();
+  }
+
+  Future _loadServices() async {
+    repository = await ResultadoRepository.getInstance();
+    settingsRepository = await SettingsRepository.getInstance();
   }
 
   @override
@@ -34,16 +43,12 @@ class _MainViewState extends State<MainView> {
             Tab(icon: Icon(Icons.history))
           ]),
         ),
-        body: TabBarView(children: [
-          const HomeView(),
-          HistoryView(
-            key: _key,
-          )
-        ]),
+        body: TabBarView(
+            children: [const HomeView(), HistoryView(key: _keyHistory)]),
         floatingActionButton: FloatingActionButton(
           elevation: 15,
           onPressed: () {
-            _callNew(context);
+            newIMC();
           },
           child: const Icon(Icons.add),
         ),
@@ -51,10 +56,14 @@ class _MainViewState extends State<MainView> {
     ));
   }
 
-  void _callNew(BuildContext context) {
+  Future newIMC() async {
     final formKey = GlobalKey<FormState>();
-    var pesoController = TextEditingController();
-    var alturaController = TextEditingController();
+    ResultadoModel registroModel = ResultadoModel();
+
+    var settings = settingsRepository.get();
+
+    registroModel.altura = settings.stature;
+
     showDialog(
         context: context,
         builder: (BuildContext bc) {
@@ -70,7 +79,6 @@ class _MainViewState extends State<MainView> {
                         child: Column(children: [
                           TextFormField(
                             autofocus: true,
-                            controller: pesoController,
                             decoration: const InputDecoration(
                                 label: Text("Peso (kg)"),
                                 icon: Icon(Icons.monitor_weight)),
@@ -79,10 +87,13 @@ class _MainViewState extends State<MainView> {
                             validator: (String? value) {
                               return _validaCampos(value);
                             },
+                            onChanged: (value) => registroModel.peso =
+                                double.tryParse(value) ?? 0,
                           ),
                           TextFormField(
+                            controller: TextEditingController(
+                                text: settings.stature.toString()),
                             autofocus: true,
-                            controller: alturaController,
                             decoration: const InputDecoration(
                                 label: Text("Altura (m)"),
                                 icon: Icon(Icons.height)),
@@ -91,6 +102,8 @@ class _MainViewState extends State<MainView> {
                             validator: (String? value) {
                               return _validaCampos(value);
                             },
+                            onChanged: (value) => registroModel.altura =
+                                double.tryParse(value) ?? 0,
                           ),
                         ]))
                   ])),
@@ -105,16 +118,10 @@ class _MainViewState extends State<MainView> {
               ),
               ElevatedButton.icon(
                   onPressed: () async {
-                    pesoController.text =
-                        pesoController.text.replaceAll(",", ".");
-                    alturaController.text =
-                        alturaController.text.replaceAll(",", ".");
                     if (formKey.currentState!.validate()) {
-                      var peso = double.tryParse(pesoController.text) ?? 0;
-                      var altura = double.tryParse(alturaController.text) ?? 0;
-                      var reg = RegistroModel(peso, altura);
-                      await RegistroService.instance.add(reg);
-                      _showResult(reg);
+                      repository.create(registroModel);
+                      _showResult(registroModel);
+                      _keyHistory.currentState?.refresh();
                     }
                   },
                   icon: const Icon(Icons.save),
@@ -132,10 +139,8 @@ class _MainViewState extends State<MainView> {
     return null;
   }
 
-  void _showResult(RegistroModel reg) {
-    _key.currentState?.setState(() {});
+  void _showResult(ResultadoModel reg) {
     Navigator.pop(context);
-    setState(() {});
     showModalBottomSheet(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         context: context,
@@ -144,7 +149,7 @@ class _MainViewState extends State<MainView> {
         });
   }
 
-  Widget _result(RegistroModel registro) {
+  Widget _result(ResultadoModel registro) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Wrap(
@@ -175,7 +180,7 @@ class _MainViewState extends State<MainView> {
                     direction: Axis.vertical,
                     children: [
                       Text(
-                        registro.tabela?.descricao,
+                        registro.tabela?.descricao ?? "",
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),

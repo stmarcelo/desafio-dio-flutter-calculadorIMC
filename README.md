@@ -9,7 +9,7 @@ Calculadora de índice de massa corporal (IMC) em app flutter
 - Configuração com nome e altura persistidos com shared preferences
 - Entrada com peso e altura
 - Cálculo de IMC
-- Histórico de todos os cálculos com índice, resultado, data e hora
+- Histórico de todos os cálculos com índice, resultado, data e hora persistidos com SQLite
 
 
 ## Stack
